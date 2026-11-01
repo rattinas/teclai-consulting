@@ -1,0 +1,12 @@
+{
+  "name": "vhs unterland",
+  "titel": "Angebote der vhs unterland",
+  "headline": "Lern was, das du wirklich brauchst.",
+  "intro": "Aktuelle Kurse und Angebote der vhs unterland. Kurz anschauen, direkt anmelden.",
+  "vhs_link": "https://www.vhs-unterland.de/",
+  "anmelde_fallback": "https://www.vhs-unterland.de/kurssuche",
+  "impressum": "https://www.vhs-unterland.de/meta-navigation/impressum",
+  "datenschutz": "https://www.vhs-unterland.de/datenschutz",
+  "kontakt": "https://www.vhs-unterland.de/meta-navigation/kontakt",
+  "indexieren": false
+}

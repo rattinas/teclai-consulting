@@ -1,0 +1,58 @@
+name: Angebot prüfen und freigeben
+
+# Pull Requests, die nur Inhalte ändern und die Prüfung bestehen, gehen automatisch live.
+# Alles andere (Layout, Skripte, Workflows) bleibt offen und braucht eine Freigabe von Hand.
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+    branches: [main]
+
+permissions:
+  contents: write
+  pull-requests: write
+  actions: write
+
+jobs:
+  freigeben:
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    env:
+      PR: ${{ github.event.pull_request.number }}
+      GH_REPO: ${{ github.repository }}
+    steps:
+      - name: Nur Inhalte geändert?
+        id: pfade
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh pr diff "$PR" --name-only > "$RUNNER_TEMP/dateien.txt"
+          cat "$RUNNER_TEMP/dateien.txt"
+          if grep -qvE '^(angebote/[a-z0-9-]+\.json|bilder/[^/]+\.(jpg|jpeg|png|webp)|seite\.json)$' "$RUNNER_TEMP/dateien.txt"; then
+            echo "nur_inhalt=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "nur_inhalt=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Inhalte prüfen
+        run: python3 tools/build.py --check
+
+      - name: Automatisch freigeben und veröffentlichen
+        if: steps.pfade.outputs.nur_inhalt == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh pr ready "$PR" || true
+          gh pr merge "$PR" --squash --delete-branch
+          gh workflow run veroeffentlichen.yml --ref main
+
+      - name: Hinweis bei Änderungen außerhalb der Inhalte
+        if: steps.pfade.outputs.nur_inhalt == 'false'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh pr comment "$PR" --body "Diese Änderung betrifft mehr als Angebote, Bilder oder seite.json. Sie geht deshalb nicht automatisch live und muss von Hand geprüft und freigegeben werden."

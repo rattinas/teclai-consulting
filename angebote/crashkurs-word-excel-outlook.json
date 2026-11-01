@@ -1,0 +1,23 @@
+{
+  "status": "online",
+  "titel": "Crashkurs Word, Excel & Outlook",
+  "teaser": "Die Tools, die du wirklich brauchst. Fit für Ausbildung, Studium oder Praktika.",
+  "kategorie": "Computer & Office",
+  "zeit": "2 Samstagvormittage, 9–13 Uhr",
+  "termine": [],
+  "beschreibung": [
+    "Werde fit für Ausbildung oder Studium – in nur zwei Samstagvormittagen! Referate gestalten, Tabellen erstellen oder professionelle E-Mails schreiben: Wer Word, Excel und Outlook sicher beherrscht, ist im Schulalltag und später im Berufsleben klar im Vorteil.",
+    "In diesem Kurs lernst du die wichtigsten Funktionen der drei Office-Programme ganz praktisch kennen. Du probierst alles selbst aus, arbeitest an eigenen Beispielen und kannst jederzeit deine Fragen stellen."
+  ],
+  "inhalte": [
+    {
+      "titel": "Samstag 1: Word",
+      "text": "Texte professionell formatieren, Überschriften und Absätze gestalten sowie Dateien sinnvoll speichern und organisieren."
+    },
+    {
+      "titel": "Samstag 2: Excel & Outlook",
+      "text": "Tabellen erstellen, einfache Formeln anwenden, Daten übersichtlich darstellen und E-Mails mit Anhängen und Ordnern sicher verwalten."
+    }
+  ],
+  "abschluss": "Du lernst genau die Funktionen, die du wirklich brauchst – und kannst sie direkt für deine nächsten Schulprojekte, deine Ausbildung oder dein Studium nutzen. So startest du bestens vorbereitet in deine nächsten Schritte!"
+}
