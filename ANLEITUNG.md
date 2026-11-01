@@ -1,6 +1,6 @@
 # Anleitung für Nicole
 
-So legst du Angebote auf der Website an, indem du ChatGPT einfach schreibst, was online soll.
+So legst du Angebote auf deiner Website an, indem du ChatGPT einfach schreibst, was online soll.
 
 ## Einmal einrichten
 
@@ -12,7 +12,7 @@ Du brauchst dafür:
 Dann in ChatGPT:
 
 1. Unter **Work in** die Option **Cloud** wählen und **Select environment** öffnen.
-2. **Create environment** wählen. Wenn ChatGPT danach fragt, GitHub verbinden und das Projekt `vhs-unterland-angebote` freigeben.
+2. **Create environment** wählen. Wenn ChatGPT danach fragt, GitHub verbinden und das Projekt `teclai-consulting` freigeben.
 3. Das Projekt auswählen, **Get started** klicken und warten, bis die Einrichtung durch ist.
 4. **Publish** klicken und warten, bis «Environment published» erscheint.
 
@@ -23,7 +23,7 @@ Die Menüs können sich bei ChatGPT ändern. Falls etwas anders aussieht: OpenAI
 1. In ChatGPT unter **Work in > Cloud** das Projekt wählen und **Start a new task** klicken.
 2. Schreiben, was online soll, zum Beispiel:
 
-   > Lege ein neues Angebot an: Bewerbungstraining für Schulabgänger, Samstag 13.02.2027, 10–14 Uhr, in Talheim, 39 Euro. Anmeldung unter https://www.vhs-unterland.de/... Hier ist der Text: ...
+   > Lege ein neues Angebot an: Bewerbungstraining für Schulabgänger, Samstag 13.02.2027, 10–14 Uhr, in Stuttgart, 39 Euro. Hier ist der Text: ...
 
 3. Warten, bis ChatGPT fertig ist, und kurz die Zusammenfassung lesen.
 4. Auf **Create PR** klicken (der Knopf kann auch «Pull Request öffnen» heißen).

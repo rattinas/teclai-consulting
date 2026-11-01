@@ -14,15 +14,16 @@ import re
 import shutil
 import sys
 from pathlib import Path
-from urllib.parse import urlparse
+from urllib.parse import quote, urlparse
 
 ROOT = Path(__file__).resolve().parent.parent
 OUT = ROOT / "_site"
 WOCHENTAGE = ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"]
 BILDER = {".jpg", ".jpeg", ".png", ".webp"}
 
-SEITE_FELDER = {"name", "titel", "headline", "intro", "vhs_link", "anmelde_fallback", "impressum", "datenschutz",
-                "kontakt", "indexieren"}
+SEITE_PFLICHT = {"name", "person", "titel", "headline", "intro", "indexieren"}
+SEITE_OPTIONAL = {"stichworte", "kontakt_email", "impressum", "datenschutz"}
+FUNKE = "M0-100C13-13 13-13 100 0C13 13 13 13 0 100C-13 13-13 13-100 0C-13-13-13-13 0-100Z"
 ANGEBOT_PFLICHT = {"status", "titel", "teaser", "kategorie", "beschreibung"}
 ANGEBOT_OPTIONAL = {"zeit", "termine", "ort", "preis", "anmelde_link", "bild", "bild_text", "inhalte", "abschluss"}
 
@@ -51,18 +52,23 @@ def pruefe_seite(fehler):
     except (OSError, json.JSONDecodeError) as err:
         fehler.append(f"{ort}: nicht lesbar ({err}).")
         return {}
-    for feld in sorted(set(seite) - SEITE_FELDER):
+    for feld in sorted(set(seite) - SEITE_PFLICHT - SEITE_OPTIONAL):
         fehler.append(f'{ort}: unbekanntes Feld "{feld}".')
-    for feld in sorted(SEITE_FELDER - set(seite)):
+    for feld in sorted(SEITE_PFLICHT - set(seite)):
         fehler.append(f'{ort}: Feld "{feld}" fehlt.')
-    for feld in ("name", "titel", "headline", "intro"):
+    for feld in ("name", "person", "titel", "headline", "intro"):
         if feld in seite:
             text_ok(seite[feld], feld, fehler, ort)
-    for feld in ("vhs_link", "anmelde_fallback", "impressum", "datenschutz", "kontakt"):
-        if feld in seite:
-            link_ok(seite[feld], feld, fehler, ort)
+    for feld in ("stichworte", "impressum", "datenschutz"):
+        wert = seite.get(feld, [])
+        if not isinstance(wert, list) or not all(isinstance(x, str) and x.strip() for x in wert):
+            fehler.append(f'{ort}: Feld "{feld}" muss eine Liste aus Texten sein.')
+    if "kontakt_email" in seite and not re.fullmatch(r"[^@\s]+@[^@\s]+\.[^@\s]+", str(seite["kontakt_email"])):
+        fehler.append(f'{ort}: Feld "kontakt_email" ist keine gültige E-Mail-Adresse.')
     if not isinstance(seite.get("indexieren"), bool):
         fehler.append(f'{ort}: Feld "indexieren" muss true oder false sein.')
+    elif seite["indexieren"] and not (seite.get("impressum") and seite.get("datenschutz")):
+        fehler.append(f'{ort}: "indexieren" darf erst true sein, wenn "impressum" und "datenschutz" ausgefüllt sind.')
     return seite
 
 
@@ -137,6 +143,17 @@ def wann(a):
     return "Termine folgen"
 
 
+def fuss_links(seite, wurzel):
+    links = []
+    if seite.get("kontakt_email"):
+        links.append(f'<a href="mailto:{e(seite["kontakt_email"])}">Kontakt</a>')
+    if seite.get("impressum"):
+        links.append(f'<a href="{wurzel}impressum/index.html">Impressum</a>')
+    if seite.get("datenschutz"):
+        links.append(f'<a href="{wurzel}datenschutz/index.html">Datenschutz</a>')
+    return f'<nav aria-label="Rechtliches">{"".join(links)}</nav>' if links else ""
+
+
 def rahmen(seite, titel, beschreibung, tiefe, inhalt):
     wurzel = "../" * tiefe
     robots = "" if seite["indexieren"] else '<meta name="robots" content="noindex">\n'
@@ -151,6 +168,8 @@ def rahmen(seite, titel, beschreibung, tiefe, inhalt):
 <meta property="og:description" content="{e(beschreibung)}">
 <meta property="og:type" content="website">
 <meta name="theme-color" content="#1048E6">
+<link rel="icon" href="{wurzel}assets/marke/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="{wurzel}assets/marke/icon-180.png">
 <link rel="preload" href="{wurzel}assets/fonts/inter-tight-900.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="{wurzel}assets/style.css">
 </head>
@@ -158,13 +177,8 @@ def rahmen(seite, titel, beschreibung, tiefe, inhalt):
 <a class="sprung" href="#inhalt">Zum Inhalt springen</a>
 {inhalt}
 <footer class="fuss"><div class="innen fuss-inhalt">
-<span>{e(seite["name"])}</span>
-<nav aria-label="Rechtliches">
-<a href="{e(seite["vhs_link"])}">Website der vhs</a>
-<a href="{e(seite["kontakt"])}">Kontakt</a>
-<a href="{e(seite["impressum"])}">Impressum</a>
-<a href="{e(seite["datenschutz"])}">Datenschutz</a>
-</nav>
+<span>{e(seite["name"])} · {e(seite["person"])}</span>
+{fuss_links(seite, wurzel)}
 </div></footer>
 <script>
 document.querySelectorAll("[data-bis]").forEach(function (el) {{
@@ -178,7 +192,7 @@ document.querySelectorAll("[data-bis]").forEach(function (el) {{
 
 def kopf(seite, wurzel):
     return f"""<div class="innen kopf">
-<a class="logo" href="{wurzel}index.html"><img src="{wurzel}assets/logo.svg" alt="{e(seite["name"])}, zur Startseite" width="339" height="198"></a>
+<a class="logo" href="{wurzel}index.html"><img src="{wurzel}assets/marke/logo-auf-blau.svg" alt="{e(seite["name"])}, zur Startseite" width="534" height="282"></a>
 </div>"""
 
 
@@ -197,6 +211,12 @@ def karte(a):
 </div></a></li>"""
 
 
+def hero_bild(seite):
+    funken = "".join(f'<svg class="funke f{n}" viewBox="-100 -100 200 200"><path d="{FUNKE}"/></svg>' for n in (1, 2, 3))
+    sticker = "".join(f'<span class="sticker s{n}">{e(w)}</span>' for n, w in enumerate(seite.get("stichworte", [])[:3], 1))
+    return f'<div class="hero-bild" aria-hidden="true">{funken}{sticker}</div>'
+
+
 def startseite(seite, angebote):
     if angebote:
         liste = f'<ul class="raster">{"".join(karte(a) for a in angebote)}</ul>'
@@ -209,7 +229,7 @@ def startseite(seite, angebote):
 <p>{e(seite["intro"])}</p>
 <a class="knopf" href="#inhalt">Zu den Angeboten</a>
 </div></div>
-<img class="hero-foto" src="assets/hero.jpg" alt="Lachende junge Frau im roten Hoodie mit Laptop unter dem Arm" width="1300" height="1523">
+{hero_bild(seite)}
 </header>
 <main id="inhalt" class="angebote"><div class="innen">
 <h2>Aktuelle Angebote</h2>
@@ -237,8 +257,11 @@ def angebotsseite(seite, a):
     abschluss = f'<p class="abschluss">{e(a["abschluss"])}</p>' if a.get("abschluss") else ""
     if a.get("anmelde_link"):
         knopf = f'<a class="knopf" href="{e(a["anmelde_link"])}">Jetzt anmelden</a>'
+    elif seite.get("kontakt_email"):
+        betreff = quote(f'Anfrage: {a["titel"]}')
+        knopf = f'<a class="knopf" href="mailto:{e(seite["kontakt_email"])}?subject={betreff}">Jetzt anfragen</a>'
     else:
-        knopf = f'<a class="knopf" href="{e(seite["anmelde_fallback"])}">Anmelden bei deiner vhs</a>'
+        knopf = ""
     inhalt = f"""<header class="seitenkopf auf-blau">
 {kopf(seite, "../../")}
 <div class="innen seitenkopf-inhalt">
@@ -259,6 +282,19 @@ def angebotsseite(seite, a):
 </div>
 </div></main>"""
     return rahmen(seite, f'{a["titel"]} · {seite["name"]}', a["teaser"], 2, inhalt)
+
+
+def rechtsseite(seite, titel, zeilen):
+    text = "".join(f"<p>{e(z)}</p>" for z in zeilen)
+    inhalt = f"""<header class="seitenkopf auf-blau">
+{kopf(seite, "../")}
+<div class="innen seitenkopf-inhalt">
+<a class="zurueck" href="../index.html">← Zur Startseite</a>
+<h1>{e(titel)}</h1>
+</div>
+</header>
+<main id="inhalt"><div class="innen"><div class="text">{text}</div></div></main>"""
+    return rahmen(seite, f'{titel} · {seite["name"]}', f'{titel} von {seite["name"]}', 1, inhalt)
 
 
 def main():
@@ -292,6 +328,11 @@ def main():
         ziel = OUT / "angebote" / a["_slug"]
         ziel.mkdir(parents=True)
         (ziel / "index.html").write_text(angebotsseite(seite, a), encoding="utf-8")
+    for feld, titel in (("impressum", "Impressum"), ("datenschutz", "Datenschutz")):
+        if seite.get(feld):
+            ziel = OUT / feld
+            ziel.mkdir()
+            (ziel / "index.html").write_text(rechtsseite(seite, titel, seite[feld]), encoding="utf-8")
     robots = "User-agent: *\nAllow: /\n" if seite["indexieren"] else "User-agent: *\nDisallow: /\n"
     (OUT / "robots.txt").write_text(robots, encoding="utf-8")
     print(f"Seite geschrieben nach {OUT.name}/")

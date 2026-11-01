@@ -1,6 +1,6 @@
-# Angebote-Website der vhs unterland
+# Website von Teclai Consulting
 
-Statische Website. Die Inhalte liegen als JSON-Dateien im Repo. Du wirst meist von Nicole gebeten, ein Angebot anzulegen, zu ändern oder offline zu nehmen. Sie ist keine Entwicklerin: Antworte auf Deutsch, kurz und ohne Technikbegriffe.
+Statische Website von Nicole Teclai. Die Inhalte liegen als JSON-Dateien im Repo. Du wirst meist von Nicole gebeten, ein Angebot anzulegen, zu ändern oder offline zu nehmen. Sie ist keine Entwicklerin: Antworte auf Deutsch, kurz und ohne Technikbegriffe.
 
 ## Was du ändern darfst
 
@@ -8,7 +8,7 @@ Für normale Aufträge nur diese Dateien:
 
 - `angebote/<name>.json`: ein Angebot pro Datei
 - `bilder/`: Bilder zu Angeboten (jpg, png, webp)
-- `seite.json`: Texte der Startseite und Links
+- `seite.json`: Texte der Startseite, Stichworte, Kontakt-Adresse, Impressum und Datenschutz
 
 Nur diese Änderungen gehen automatisch live. Layout, Skripte und Workflows nur ändern, wenn ausdrücklich verlangt, und Nicole dann sagen, dass Benedikt das freigeben muss.
 
@@ -44,7 +44,7 @@ Optionale Felder:
 - `zeit`: zum Beispiel `2 Samstagvormittage, 9–13 Uhr`
 - `termine`: Liste im Format `JJJJ-MM-TT`. Nach dem letzten Termin verschwindet das Angebot von der Startseite.
 - `ort`, `preis`: kurzer Text
-- `anmelde_link`: muss mit `https://` beginnen. Ohne Link führt der Knopf zur Kurssuche der vhs.
+- `anmelde_link`: muss mit `https://` beginnen. Ohne Link öffnet der Knopf eine Mail an `kontakt_email` aus `seite.json`. Ist auch die nicht eingetragen, erscheint kein Knopf.
 - `bild`: Dateiname aus `bilder/`, dazu `bild_text` mit einer kurzen Bildbeschreibung
 - `inhalte`: Liste aus Einträgen mit `titel` und `text`, erscheint als «Das erwartet dich»
 - `abschluss`: ein Absatz am Ende
